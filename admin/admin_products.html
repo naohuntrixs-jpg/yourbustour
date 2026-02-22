@@ -1,104 +1,412 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>매일투어 관리자 - 상품관리</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>유어버스투어 관리자 - 상품관리</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <meta name="robots" content="noindex,nofollow">
 </head>
+
 <body class="bg-gray-100 flex min-h-screen">
-    <aside class="w-64 bg-gray-900 text-white flex-shrink-0 hidden md:block p-6">
-        <h1 class="text-2xl font-black text-orange-500 italic mb-10">매일투어 Admin</h1>
-        <nav class="space-y-4 font-bold">
-            <a href="admin.html" class="block p-3 text-gray-400 hover:bg-gray-800 rounded-xl transition">대시보드</a>
-            <a href="admin_products.html" class="block p-3 bg-orange-500 rounded-xl text-white">상품 관리</a>
-            <a href="admin_users.html" class="block p-3 text-gray-400 hover:bg-gray-800 rounded-xl transition">회원 관리</a>
-        </nav>
-    </aside>
 
-    <main class="flex-1 p-8">
-        <div class="flex justify-between items-center mb-10">
-            <h2 class="text-3xl font-bold text-gray-800">산행 상품 관리</h2>
-            <button onclick="document.getElementById('modal').classList.remove('hidden')" class="bg-orange-500 text-white px-6 py-3 rounded-2xl font-bold shadow-lg hover:bg-orange-600">새 상품 추가</button>
+  <!-- Sidebar -->
+  <aside class="w-64 bg-gray-900 text-white flex-shrink-0 hidden md:block p-6">
+    <h1 class="text-2xl font-black italic mb-10">
+      <span class="text-[#1A2F53] bg-white px-2 py-1 rounded-lg">유어버스</span><span class="text-[#ff6b00]">투어</span>
+      <span class="text-gray-300 text-sm font-bold ml-1">Admin</span>
+    </h1>
+    <nav class="space-y-4 font-bold">
+      <a href="admin.html" class="block p-3 text-gray-400 hover:bg-gray-800 rounded-xl transition">대시보드</a>
+      <a href="admin_products.html" class="block p-3 bg-[#1A2F53] rounded-xl text-white">상품 관리</a>
+      <a href="admin_users.html" class="block p-3 text-gray-400 hover:bg-gray-800 rounded-xl transition">회원 관리</a>
+    </nav>
+
+    <div class="mt-10 p-4 bg-gray-800/60 rounded-2xl text-xs text-gray-300 leading-relaxed">
+      <div class="font-black text-white mb-1">저장 위치</div>
+      <div>현재 버전은 <span class="text-white font-bold">localStorage(maeil_db)</span>에 저장됩니다.</div>
+      <div class="mt-2">운영용은 Supabase/Firebase로 전환을 추천합니다.</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 p-6 md:p-10">
+
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-8">
+      <div>
+        <h2 class="text-3xl font-bold text-gray-800">산행 상품 관리</h2>
+        <p class="text-sm text-gray-500 mt-1">상품 등록/수정/삭제, 상세정보 및 이미지 URL까지 관리합니다.</p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+        <div class="flex gap-2 items-center bg-white border rounded-2xl px-3 py-2 shadow-sm">
+          <i class="fa-solid fa-filter text-gray-400"></i>
+          <input id="filterMonth" type="month" class="outline-none text-sm text-gray-700 bg-transparent" />
+          <button onclick="applyFilter()" class="px-3 py-1.5 rounded-xl bg-gray-100 text-gray-700 text-sm font-bold hover:bg-gray-200">적용</button>
+          <button onclick="clearFilter()" class="px-3 py-1.5 rounded-xl bg-gray-50 text-gray-500 text-sm font-bold hover:bg-gray-100">전체</button>
         </div>
 
-        <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
-            <table class="w-full text-left">
-                <thead class="bg-gray-50 text-gray-400 text-xs font-bold uppercase">
-                    <tr>
-                        <th class="p-4">날짜</th>
-                        <th class="p-4">상품명</th>
-                        <th class="p-4">가격</th>
-                        <th class="p-4">상태</th>
-                        <th class="p-4">관리</th>
-                    </tr>
-                </thead>
-                <tbody id="listBody" class="text-sm"></tbody>
-            </table>
-        </div>
-    </main>
-
-    <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-3xl w-full max-w-md p-8">
-            <h3 class="text-xl font-bold mb-6">신규 상품 등록</h3>
-            <div class="space-y-4">
-                <input type="date" id="pDate" class="w-full bg-gray-50 p-4 rounded-xl outline-none">
-                <input type="text" id="pName" placeholder="상품명 (예: 한라산 산행)" class="w-full bg-gray-50 p-4 rounded-xl outline-none">
-                <input type="number" id="pPrice" placeholder="가격 (숫자만)" class="w-full bg-gray-50 p-4 rounded-xl outline-none">
-                <select id="pStatus" class="w-full bg-gray-50 p-4 rounded-xl outline-none font-bold">
-                    <option value="모객중">모객중</option>
-                    <option value="출발확정">출발확정</option>
-                </select>
-                <div class="flex gap-2 mt-6">
-                    <button onclick="document.getElementById('modal').classList.add('hidden')" class="flex-1 p-4 bg-gray-100 rounded-2xl font-bold">취소</button>
-                    <button onclick="addItem()" class="flex-1 p-4 bg-orange-500 text-white rounded-2xl font-bold">저장하기</button>
-                </div>
-            </div>
-        </div>
+        <button onclick="openModal()" class="bg-[#1A2F53] text-white px-6 py-3 rounded-2xl font-bold shadow-lg hover:bg-[#162543]">
+          <i class="fa-solid fa-plus mr-2"></i>새 상품 추가
+        </button>
+      </div>
     </div>
 
-    <script>
-        // 로컬 데이터베이스 로드
-        let db = JSON.parse(localStorage.getItem('maeil_db')) || [];
+    <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+      <div class="px-5 py-4 border-b bg-gray-50 flex items-center justify-between">
+        <div class="text-sm text-gray-500">
+          총 <span id="countText" class="font-black text-gray-800">0</span>건
+          <span id="filterText" class="ml-2 text-gray-400"></span>
+        </div>
+        <button onclick="exportJSON()" class="text-sm font-bold text-gray-600 hover:text-gray-900">
+          <i class="fa-solid fa-download mr-1"></i>JSON 백업
+        </button>
+      </div>
 
-        function render() {
-            const body = document.getElementById('listBody');
-            body.innerHTML = db.map((item, idx) => `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="p-4 font-medium">${item.date}</td>
-                    <td class="p-4 font-bold text-gray-800">${item.name}</td>
-                    <td class="p-4 text-orange-600 font-bold">${Number(item.price).toLocaleString()}원</td>
-                    <td class="p-4"><span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-bold">${item.status}</span></td>
-                    <td class="p-4"><button onclick="delItem(${idx})" class="text-red-400 hover:text-red-600 font-bold">삭제</button></td>
-                </tr>
-            `).join('');
-        }
+      <div class="overflow-x-auto">
+        <table class="w-full text-left min-w-[920px]">
+          <thead class="bg-white text-gray-400 text-xs font-bold uppercase">
+            <tr class="border-b">
+              <th class="p-4">날짜</th>
+              <th class="p-4">이미지</th>
+              <th class="p-4">상품명</th>
+              <th class="p-4">가격</th>
+              <th class="p-4">상태</th>
+              <th class="p-4">관리</th>
+            </tr>
+          </thead>
+          <tbody id="listBody" class="text-sm"></tbody>
+        </table>
+      </div>
+    </div>
 
-        function addItem() {
-            const date = document.getElementById('pDate').value;
-            const name = document.getElementById('pName').value;
-            const price = document.getElementById('pPrice').value;
-            const status = document.getElementById('pStatus').value;
+  </main>
 
-            if(!date || !name || !price) return alert("모든 항목을 입력해주세요!");
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-3xl w-full max-w-3xl p-8 max-h-[88vh] overflow-auto">
+      <div class="flex items-start justify-between gap-4 mb-6">
+        <div>
+          <h3 id="modalTitle" class="text-xl font-black text-gray-800">신규 상품 등록</h3>
+          <p class="text-xs text-gray-400 mt-1">필수: 날짜/상품명/가격</p>
+        </div>
+        <button onclick="closeModal()" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
 
-            db.push({ date, name, price, status });
-            localStorage.setItem('maeil_db', JSON.stringify(db));
-            render();
-            document.getElementById('modal').classList.add('hidden');
-            alert("상품이 저장되었습니다!");
-        }
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">날짜 *</label>
+            <input type="date" id="pDate" class="w-full bg-gray-50 p-4 rounded-xl outline-none">
+          </div>
 
-        function delItem(idx) {
-            if(confirm("정말 삭제하시겠습니까?")) {
-                db.splice(idx, 1);
-                localStorage.setItem('maeil_db', JSON.stringify(db));
-                render();
-            }
-        }
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">상품명 *</label>
+            <input type="text" id="pName" placeholder="상품명 (예: 한라산 산행)" class="w-full bg-gray-50 p-4 rounded-xl outline-none">
+          </div>
 
-        window.onload = render;
-    </script>
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">가격(1인) *</label>
+            <input type="number" id="pPrice" placeholder="가격 (숫자만)" class="w-full bg-gray-50 p-4 rounded-xl outline-none">
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">상품 이미지 URL</label>
+            <input type="url" id="p_image" class="w-full bg-gray-50 p-4 rounded-xl outline-none" placeholder="https://... 이미지 주소를 입력하세요">
+            <p class="text-[10px] text-gray-400 mt-1">* 구글 이미지/블로그 주소는 차단될 수 있어요. 가능하면 직접 업로드한 이미지 URL을 권장합니다.</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">상태</label>
+            <select id="pStatus" class="w-full bg-gray-50 p-4 rounded-xl outline-none font-bold">
+              <option value="모객중">모객중</option>
+              <option value="출발확정">출발확정</option>
+            </select>
+          </div>
+
+          <div class="bg-gray-50 rounded-2xl p-4 border">
+            <div class="text-xs font-black text-gray-700 mb-2">이미지 미리보기</div>
+            <img id="previewImg" class="w-full h-44 object-cover rounded-2xl hidden" alt="미리보기"
+                 onerror="this.classList.add('hidden'); this.removeAttribute('src'); document.getElementById('previewHint').classList.remove('hidden');">
+            <div id="previewHint" class="text-xs text-gray-400">URL을 입력하면 여기서 미리보기가 표시됩니다.</div>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">상품 설명</label>
+            <textarea id="pDesc" placeholder="간단 소개" class="w-full bg-gray-50 p-4 rounded-xl outline-none min-h-[90px]"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">일정/코스 (줄바꿈 항목)</label>
+            <textarea id="pItin" placeholder="예) 07:00 사당 출발\n10:00 도착\n..." class="w-full bg-gray-50 p-4 rounded-xl outline-none min-h-[100px]"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">탑승지/집결지 (줄바꿈 옵션)</label>
+            <textarea id="pMeet" placeholder="예) 사당역 1번출구 (07:00)\n양재역 12번출구 (07:20)" class="w-full bg-gray-50 p-4 rounded-xl outline-none min-h-[100px]"></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-1">포함사항 (줄바꿈)</label>
+              <textarea id="pInc" class="w-full bg-gray-50 p-4 rounded-xl outline-none min-h-[90px]"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-1">불포함/추가비용 (줄바꿈)</label>
+              <textarea id="pExc" class="w-full bg-gray-50 p-4 rounded-xl outline-none min-h-[90px]"></textarea>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">취소/환불 규정</label>
+            <textarea id="pCancel" class="w-full bg-gray-50 p-4 rounded-xl outline-none min-h-[90px]"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">안내/비고</label>
+            <textarea id="pNotes" class="w-full bg-gray-50 p-4 rounded-xl outline-none min-h-[90px]"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-2 mt-8">
+        <button onclick="closeModal()" class="flex-1 p-4 bg-gray-100 rounded-2xl font-bold hover:bg-gray-200">취소</button>
+        <button id="saveBtn" onclick="saveItem()" class="flex-1 p-4 bg-[#1A2F53] text-white rounded-2xl font-bold hover:bg-[#162543]">저장하기</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ===== localStorage DB =====
+  let db = [];
+  let editingId = null;
+  let activeMonth = ""; // 'YYYY-MM'
+
+  function loadDB(){
+    try { return JSON.parse(localStorage.getItem('maeil_db')) || []; }
+    catch(e){ return []; }
+  }
+
+  function normalizeDB(){
+    let changed = false;
+    const raw = loadDB();
+    db = (Array.isArray(raw) ? raw : []).map((it, i) => {
+      if (!it || typeof it !== 'object') {
+        changed = true;
+        return { id: Date.now()+i, date:'', name:'', price:0, status:'모객중' };
+      }
+      if (it.id === undefined || it.id === null) { it.id = Date.now()+i; changed = true; }
+      if (it.image_url === undefined) { it.image_url = ''; changed = true; }
+      if (it.description === undefined) { it.description = ''; changed = true; }
+      if (it.itinerary === undefined) { it.itinerary = ''; changed = true; }
+      if (it.meeting_points === undefined) { it.meeting_points = ''; changed = true; }
+      if (it.includes === undefined) { it.includes = ''; changed = true; }
+      if (it.excludes === undefined) { it.excludes = ''; changed = true; }
+      if (it.cancel_policy === undefined) { it.cancel_policy = ''; changed = true; }
+      if (it.notes === undefined) { it.notes = ''; changed = true; }
+      return it;
+    });
+    if (changed) localStorage.setItem('maeil_db', JSON.stringify(db));
+  }
+
+  function openModal(item=null){
+    document.getElementById('modal').classList.remove('hidden');
+
+    const isEdit = !!item;
+    editingId = isEdit ? item.id : null;
+
+    document.getElementById('modalTitle').innerText = isEdit ? '상품 수정' : '신규 상품 등록';
+    document.getElementById('saveBtn').innerText = isEdit ? '수정 저장' : '저장하기';
+
+    document.getElementById('pDate').value = (item?.date || '');
+    document.getElementById('pName').value = (item?.name || '');
+    document.getElementById('pPrice').value = (item?.price || '');
+    document.getElementById('pStatus').value = (item?.status || '모객중');
+
+    document.getElementById('p_image').value = (item?.image_url || '');
+
+    document.getElementById('pDesc').value = (item?.description || '');
+    document.getElementById('pItin').value = (item?.itinerary || '');
+    document.getElementById('pMeet').value = (item?.meeting_points || '');
+    document.getElementById('pInc').value = (item?.includes || '');
+    document.getElementById('pExc').value = (item?.excludes || '');
+    document.getElementById('pCancel').value = (item?.cancel_policy || '');
+    document.getElementById('pNotes').value = (item?.notes || '');
+
+    refreshPreview();
+  }
+
+  function closeModal(){
+    document.getElementById('modal').classList.add('hidden');
+    editingId = null;
+  }
+
+  function refreshPreview(){
+    const url = (document.getElementById('p_image')?.value || '').trim();
+    const img = document.getElementById('previewImg');
+    const hint = document.getElementById('previewHint');
+    if (!img || !hint) return;
+
+    if (url) {
+      img.src = url;
+      img.classList.remove('hidden');
+      hint.classList.add('hidden');
+    } else {
+      img.classList.add('hidden');
+      img.removeAttribute('src');
+      hint.classList.remove('hidden');
+    }
+  }
+
+  function applyFilter() {
+    activeMonth = document.getElementById('filterMonth').value || "";
+    render();
+  }
+
+  function clearFilter() {
+    activeMonth = "";
+    document.getElementById('filterMonth').value = "";
+    render();
+  }
+
+  function render(){
+    const body = document.getElementById('listBody');
+
+    const sorted = [...db].sort((a,b) => String(a.date || '').localeCompare(String(b.date || '')));
+
+    const view = activeMonth
+      ? sorted.filter(item => (item.date || '').startsWith(activeMonth))
+      : sorted;
+
+    document.getElementById('countText').innerText = String(view.length);
+    document.getElementById('filterText').innerText = activeMonth ? `(필터: ${activeMonth})` : '';
+
+    body.innerHTML = view.map((item) => {
+      const idx = db.indexOf(item);
+      const status = String(item.status || '').trim();
+      const statusCls = status === '출발확정'
+        ? 'bg-blue-100 text-blue-700'
+        : 'bg-[#fff1e6] text-[#ff6b00]';
+
+      const thumb = String(item.image_url || '').trim();
+      const thumbHtml = thumb
+        ? `<img src="${thumb}" class="w-16 h-12 object-cover rounded-xl border" alt="thumb"
+                onerror="this.style.display='none'; this.parentElement.querySelector('.noimg').style.display='flex';">`
+        : '';
+
+      return `
+        <tr class="border-b hover:bg-gray-50">
+          <td class="p-4 font-medium">${item.date || ''}</td>
+          <td class="p-4">
+            <div class="w-16 h-12 rounded-xl bg-gray-100 border flex items-center justify-center overflow-hidden relative">
+              <div class="noimg absolute inset-0 flex items-center justify-center text-[10px] text-gray-400 ${thumb ? 'hidden' : ''}">NO IMG</div>
+              ${thumbHtml}
+            </div>
+          </td>
+          <td class="p-4 font-bold text-gray-800">${item.name || ''}</td>
+          <td class="p-4 text-[#ff6b00] font-bold">${Number(item.price || 0).toLocaleString()}원</td>
+          <td class="p-4">
+            <span class="${statusCls} px-3 py-1 rounded-full text-xs font-bold">${status || '-'}</span>
+          </td>
+          <td class="p-4">
+            <div class="flex items-center gap-3">
+              <button onclick="editItem(${item.id})" class="text-gray-500 hover:text-gray-900 font-bold">수정</button>
+              <button onclick="delItem(${idx})" class="text-red-400 hover:text-red-600 font-bold">삭제</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function saveItem(){
+    const date = document.getElementById('pDate').value;
+    const name = document.getElementById('pName').value.trim();
+    const price = document.getElementById('pPrice').value;
+    const status = document.getElementById('pStatus').value;
+
+    const image_url = (document.getElementById('p_image')?.value || '').trim();
+
+    const description = document.getElementById('pDesc').value.trim();
+    const itinerary = document.getElementById('pItin').value.trim();
+    const meeting_points = document.getElementById('pMeet').value.trim();
+    const includes = document.getElementById('pInc').value.trim();
+    const excludes = document.getElementById('pExc').value.trim();
+    const cancel_policy = document.getElementById('pCancel').value.trim();
+    const notes = document.getElementById('pNotes').value.trim();
+
+    if (!date || !name || !price) return alert('날짜/상품명/가격은 필수입니다!');
+
+    const wasEdit = !!editingId;
+
+    const payload = {
+      id: editingId || Date.now(),
+      date, name, price, status,
+      image_url,
+      description, itinerary, meeting_points, includes, excludes, cancel_policy, notes
+    };
+
+    if (editingId) {
+      const i = db.findIndex(x => x.id === editingId);
+      if (i >= 0) db[i] = payload;
+    } else {
+      db.push(payload);
+    }
+
+    localStorage.setItem('maeil_db', JSON.stringify(db));
+    render();
+    closeModal();
+    alert(wasEdit ? '수정 저장되었습니다!' : '상품이 저장되었습니다!');
+  }
+
+  function editItem(id){
+    const item = db.find(x => x.id === id);
+    if (!item) return alert('대상을 찾을 수 없습니다.');
+    openModal(item);
+  }
+
+  function delItem(idx){
+    if(confirm('정말 삭제하시겠습니까?')) {
+      db.splice(idx, 1);
+      localStorage.setItem('maeil_db', JSON.stringify(db));
+      render();
+    }
+  }
+
+  function exportJSON(){
+    const data = JSON.stringify(db, null, 2);
+    const blob = new Blob([data], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0,10);
+    a.href = url;
+    a.download = `yourbustour_products_${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // live preview
+  document.addEventListener('input', (e) => {
+    if (e.target && e.target.id === 'p_image') refreshPreview();
+  });
+
+  window.addEventListener('load', () => {
+    normalizeDB();
+    render();
+
+    // 기본: 이번 달을 필터 입력에만 세팅
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth()+1).padStart(2,'0');
+    document.getElementById('filterMonth').value = `${y}-${m}`;
+  });
+</script>
 </body>
 </html>
