@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>매일투어 관리자 - 상품관리</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 flex min-h-screen">
+    <aside class="w-64 bg-gray-900 text-white flex-shrink-0 hidden md:block p-6">
+        <h1 class="text-2xl font-black text-orange-500 italic mb-10">매일투어 Admin</h1>
+        <nav class="space-y-4 font-bold">
+            <a href="admin.html" class="block p-3 text-gray-400 hover:bg-gray-800 rounded-xl transition">대시보드</a>
+            <a href="admin_products.html" class="block p-3 bg-orange-500 rounded-xl text-white">상품 관리</a>
+            <a href="admin_users.html" class="block p-3 text-gray-400 hover:bg-gray-800 rounded-xl transition">회원 관리</a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-8">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-3xl font-bold text-gray-800">산행 상품 관리</h2>
+            <button onclick="document.getElementById('modal').classList.remove('hidden')" class="bg-orange-500 text-white px-6 py-3 rounded-2xl font-bold shadow-lg hover:bg-orange-600">새 상품 추가</button>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 text-gray-400 text-xs font-bold uppercase">
+                    <tr>
+                        <th class="p-4">날짜</th>
+                        <th class="p-4">상품명</th>
+                        <th class="p-4">가격</th>
+                        <th class="p-4">상태</th>
+                        <th class="p-4">관리</th>
+                    </tr>
+                </thead>
+                <tbody id="listBody" class="text-sm"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md p-8">
+            <h3 class="text-xl font-bold mb-6">신규 상품 등록</h3>
+            <div class="space-y-4">
+                <input type="date" id="pDate" class="w-full bg-gray-50 p-4 rounded-xl outline-none">
+                <input type="text" id="pName" placeholder="상품명 (예: 한라산 산행)" class="w-full bg-gray-50 p-4 rounded-xl outline-none">
+                <input type="number" id="pPrice" placeholder="가격 (숫자만)" class="w-full bg-gray-50 p-4 rounded-xl outline-none">
+                <select id="pStatus" class="w-full bg-gray-50 p-4 rounded-xl outline-none font-bold">
+                    <option value="모객중">모객중</option>
+                    <option value="출발확정">출발확정</option>
+                </select>
+                <div class="flex gap-2 mt-6">
+                    <button onclick="document.getElementById('modal').classList.add('hidden')" class="flex-1 p-4 bg-gray-100 rounded-2xl font-bold">취소</button>
+                    <button onclick="addItem()" class="flex-1 p-4 bg-orange-500 text-white rounded-2xl font-bold">저장하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 로컬 데이터베이스 로드
+        let db = JSON.parse(localStorage.getItem('maeil_db')) || [];
+
+        function render() {
+            const body = document.getElementById('listBody');
+            body.innerHTML = db.map((item, idx) => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="p-4 font-medium">${item.date}</td>
+                    <td class="p-4 font-bold text-gray-800">${item.name}</td>
+                    <td class="p-4 text-orange-600 font-bold">${Number(item.price).toLocaleString()}원</td>
+                    <td class="p-4"><span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-bold">${item.status}</span></td>
+                    <td class="p-4"><button onclick="delItem(${idx})" class="text-red-400 hover:text-red-600 font-bold">삭제</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function addItem() {
+            const date = document.getElementById('pDate').value;
+            const name = document.getElementById('pName').value;
+            const price = document.getElementById('pPrice').value;
+            const status = document.getElementById('pStatus').value;
+
+            if(!date || !name || !price) return alert("모든 항목을 입력해주세요!");
+
+            db.push({ date, name, price, status });
+            localStorage.setItem('maeil_db', JSON.stringify(db));
+            render();
+            document.getElementById('modal').classList.add('hidden');
+            alert("상품이 저장되었습니다!");
+        }
+
+        function delItem(idx) {
+            if(confirm("정말 삭제하시겠습니까?")) {
+                db.splice(idx, 1);
+                localStorage.setItem('maeil_db', JSON.stringify(db));
+                render();
+            }
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>

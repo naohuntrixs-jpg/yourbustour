@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>매일투어 - 관리자 모드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 flex min-h-screen">
+
+    <aside class="w-64 bg-gray-900 text-white flex-shrink-0 hidden md:block">
+        <div class="p-6">
+            <h1 class="text-2xl font-black text-orange-500 italic">매일투어 Admin</h1>
+        </div>
+        <nav class="mt-6 space-y-1 px-4">
+            <a href="#" class="flex items-center space-x-3 p-3 bg-orange-500 rounded-xl font-bold">
+                <i class="fa-solid fa-chart-line"></i><span>대시보드</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 p-3 text-gray-400 hover:bg-gray-800 rounded-xl transition">
+                <i class="fa-solid fa-calendar-plus"></i><span>일정 등록/관리</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 p-3 text-gray-400 hover:bg-gray-800 rounded-xl transition">
+                <i class="fa-solid fa-users"></i><span>회원 관리</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 p-3 text-gray-400 hover:bg-gray-800 rounded-xl transition">
+                <i class="fa-solid fa-credit-card"></i><span>매출 전표</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-8 overflow-y-auto">
+        <header class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-bold text-gray-800">운영 현황 (2026.02)</h2>
+            <div class="flex items-center space-x-4">
+                <span class="text-sm text-gray-500">최종 업데이트: 방금 전</span>
+                <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center font-bold text-white">A</div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <p class="text-gray-400 text-xs font-bold uppercase mb-2">오늘 신규 예약</p>
+                <p class="text-3xl font-black text-orange-500">12건</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <p class="text-gray-400 text-xs font-bold uppercase mb-2">결제 대기</p>
+                <p class="text-3xl font-black text-blue-500">5건</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <p class="text-gray-400 text-xs font-bold uppercase mb-2">이번 주 산행 수</p>
+                <p class="text-3xl font-black text-gray-800">8개</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <p class="text-gray-400 text-xs font-bold uppercase mb-2">월 예상 매출</p>
+                <p class="text-3xl font-black text-green-600">₩4,250,000</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h3 class="text-lg font-bold">최근 예약자 명단</h3>
+                <button class="text-sm text-orange-500 font-bold hover:underline">전체보기</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-gray-50 text-gray-400 text-xs font-bold uppercase">
+                        <tr>
+                            <th class="p-4">예약자명</th>
+                            <th class="p-4">산행지</th>
+                            <th class="p-4">인원</th>
+                            <th class="p-4">결제수단</th>
+                            <th class="p-4">상태</th>
+                            <th class="p-4">관리</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm text-gray-600">
+                        <tr class="border-b hover:bg-gray-50 transition">
+                            <td class="p-4 font-bold">김철수</td>
+                            <td class="p-4 italic text-gray-400">한라산 눈꽃 산행</td>
+                            <td class="p-4">성인 2명</td>
+                            <td class="p-4"><span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-[10px] font-bold">Google Pay</span></td>
+                            <td class="p-4 text-green-500 font-bold">결제완료</td>
+                            <td class="p-4"><button class="text-gray-400 hover:text-orange-500"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+                        </tr>
+                        <tr class="border-b hover:bg-gray-50 transition">
+                            <td class="p-4 font-bold">이영희</td>
+                            <td class="p-4 italic text-gray-400">울릉도 투어</td>
+                            <td class="p-4">성인 1명</td>
+                            <td class="p-4"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-[10px] font-bold">무통장입금</span></td>
+                            <td class="p-4 text-orange-500 font-bold">입금대기</td>
+                            <td class="p-4"><button class="text-gray-400 hover:text-orange-500"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-8">
+            <button onclick="alert('일정 등록 창이 열립니다.')" class="bg-gray-800 text-white px-8 py-4 rounded-2xl font-bold shadow-lg hover:bg-black transition flex items-center space-x-2">
+                <i class="fa-solid fa-plus"></i>
+                <span>새로운 산행 일정 등록하기</span>
+            </button>
+        </div>
+    </main>
+
+</body>
+</html>

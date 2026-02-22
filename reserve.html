@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>매일투어 - 예약 및 결제</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script async src="https://pay.google.com/gp/p/js/pay.js" onload="onGooglePayLoaded()"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+    <header class="bg-white border-b p-4 shadow-sm">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-black text-orange-500 italic cursor-pointer" onclick="location.href='index.html'">매일투어</h1>
+            <span class="text-gray-500 text-sm font-bold">안전한 결제 시스템 가동 중</span>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto py-10 px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="lg:col-span-2 space-y-6">
+            <section class="bg-white p-6 rounded-2xl shadow-sm border">
+                <h2 class="text-xl font-bold mb-6 flex items-center">
+                    <i class="fa-solid fa-user-pen mr-2 text-orange-500"></i> 예약자 정보 입력
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">예약자 성함</label>
+                        <input type="text" placeholder="실명을 입력하세요" class="w-full border p-3 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">휴대폰 번호</label>
+                        <input type="tel" placeholder="010-0000-0000" class="w-full border p-3 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">탑승지 선택</label>
+                        <select class="w-full border p-3 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none appearance-none bg-white">
+                            <option>탑승지를 선택하세요</option>
+                            <option>사당역 1번 출구 (07:00)</option>
+                            <option>양재역 12번 출구 (07:20)</option>
+                            <option>죽전 간이정류장 (07:40)</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white p-6 rounded-2xl shadow-sm border">
+                <h2 class="text-xl font-bold mb-6 flex items-center">
+                    <i class="fa-solid fa-users mr-2 text-orange-500"></i> 인원 선택
+                </h2>
+                <div class="flex items-center justify-between p-4 bg-orange-50 rounded-xl">
+                    <span class="font-bold text-gray-700">성인 (1인 55,000원)</span>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="changeCount(-1)" class="w-8 h-8 border rounded-full bg-white hover:bg-gray-100 transition shadow-sm">-</button>
+                        <span id="adultCount" class="text-lg font-bold w-4 text-center">1</span>
+                        <button onclick="changeCount(1)" class="w-8 h-8 border rounded-full bg-white hover:bg-gray-100 transition shadow-sm">+</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="lg:col-span-1">
+            <div class="bg-white p-6 rounded-2xl shadow-lg border border-orange-100 sticky top-24">
+                <h3 class="text-lg font-bold mb-4 border-b pb-4">결제 요약</h3>
+                <div class="space-y-3 mb-6">
+                    <div class="flex justify-between text-gray-600">
+                        <span>상품 합계</span>
+                        <span id="subTotal">55,000원</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>수수료</span>
+                        <span>0원</span>
+                    </div>
+                    <div class="flex justify-between text-xl font-black text-orange-600 border-t pt-4">
+                        <span>총 결제금액</span>
+                        <span id="totalPrice">55,000원</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div id="gpay-button-container" class="w-full flex justify-center"></div>
+                    <p class="text-[10px] text-center text-gray-400">결제 시 매일투어 이용 약관에 동의하게 됩니다.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let count = 1;
+        const pricePerPerson = 55000;
+
+        function changeCount(val) {
+            count = Math.max(1, count + val);
+            document.getElementById('adultCount').innerText = count;
+            const total = count * pricePerPerson;
+            const formattedTotal = total.toLocaleString() + "원";
+            document.getElementById('subTotal').innerText = formattedTotal;
+            document.getElementById('totalPrice').innerText = formattedTotal;
+        }
+
+        /** Google Pay 결제 로직 **/
+        function onGooglePayLoaded() {
+            const paymentsClient = new google.payments.api.PaymentsClient({environment: 'TEST'});
+            const button = paymentsClient.createButton({
+                buttonColor: 'black',
+                buttonType: 'book',
+                onClick: () => {
+                    const finalPrice = count * pricePerPerson;
+                    alert(finalPrice + '원 결제를 진행합니다.');
+                }
+            });
+            document.getElementById('gpay-button-container').appendChild(button);
+        }
+    </script>
+</body>
+</html>

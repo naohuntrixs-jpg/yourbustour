@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>매일투어 관리자 - 회원관리</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 flex min-h-screen">
+
+    <aside class="w-64 bg-gray-900 text-white flex-shrink-0 hidden md:block">
+        <div class="p-6">
+            <h1 class="text-2xl font-black text-orange-500 italic">매일투어 Admin</h1>
+        </div>
+        <nav class="mt-6 space-y-1 px-4">
+            <a href="admin.html" class="flex items-center space-x-3 p-3 text-gray-400 hover:bg-gray-800 rounded-xl transition">
+                <i class="fa-solid fa-chart-line"></i><span>대시보드</span>
+            </a>
+            <a href="admin_products.html" class="flex items-center space-x-3 p-3 text-gray-400 hover:bg-gray-800 rounded-xl transition">
+                <i class="fa-solid fa-calendar-plus"></i><span>상품 관리</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 p-3 bg-orange-500 rounded-xl font-bold text-white">
+                <i class="fa-solid fa-users"></i><span>회원 관리</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-8 overflow-y-auto">
+        <header class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-bold text-gray-800">회원 관리 및 권한 설정</h2>
+            <div class="bg-white px-4 py-2 rounded-xl shadow-sm border text-sm font-bold text-gray-500">
+                총 회원수: <span class="text-orange-500">1,254</span>명
+            </div>
+        </header>
+
+        <div class="bg-white p-4 rounded-2xl shadow-sm mb-6 flex flex-wrap gap-4 items-center">
+            <div class="relative flex-1 min-w-[300px]">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-3 text-gray-400"></i>
+                <input type="text" placeholder="이름, 아이디, 연락처로 검색..." class="w-full border-none bg-gray-50 rounded-lg py-2.5 pl-11 pr-4 text-sm outline-none focus:ring-2 focus:ring-orange-500">
+            </div>
+            <select class="border-none bg-gray-50 rounded-lg px-4 py-2.5 text-sm outline-none font-bold text-gray-600">
+                <option>전체 등급</option>
+                <option>일반회원</option>
+                <option>우수회원</option>
+                <option>관리자</option>
+            </select>
+            <button class="bg-gray-800 text-white px-6 py-2.5 rounded-lg text-sm font-bold hover:bg-black transition">검색</button>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50 text-gray-400 text-xs font-bold uppercase">
+                    <tr>
+                        <th class="p-4">가입일</th>
+                        <th class="p-4">이름 (성별)</th>
+                        <th class="p-4">아이디 / 연락처</th>
+                        <th class="p-4">총 예약횟수</th>
+                        <th class="p-4">등급</th>
+                        <th class="p-4">관리</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    <tr class="border-b hover:bg-gray-50 transition">
+                        <td class="p-4 text-gray-500">2026-02-21</td>
+                        <td class="p-4 flex items-center space-x-2">
+                            <span class="font-bold text-gray-800">김꽃게</span>
+                            <span class="text-[10px] bg-blue-50 text-blue-500 px-1.5 rounded">남</span>
+                        </td>
+                        <td class="p-4">
+                            <div class="text-gray-800 font-medium">crab@naver.com</div>
+                            <div class="text-xs text-gray-400">010-1234-5678</div>
+                        </td>
+                        <td class="p-4 font-bold text-gray-600 text-center">5회</td>
+                        <td class="p-4">
+                            <span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-bold">우수회원</span>
+                        </td>
+                        <td class="p-4 flex space-x-2">
+                            <button class="p-2 text-gray-400 hover:text-orange-500 transition"><i class="fa-solid fa-user-gear"></i></button>
+                            <button class="p-2 text-gray-400 hover:text-red-500 transition"><i class="fa-solid fa-user-slash"></i></button>
+                        </td>
+                    </tr>
+                    <tr class="border-b hover:bg-gray-50 transition">
+                        <td class="p-4 text-gray-500">2026-02-19</td>
+                        <td class="p-4 flex items-center space-x-2">
+                            <span class="font-bold text-gray-800">이산악</span>
+                            <span class="text-[10px] bg-red-50 text-red-500 px-1.5 rounded">여</span>
+                        </td>
+                        <td class="p-4">
+                            <div class="text-gray-800 font-medium">mountain@daum.net</div>
+                            <div class="text-xs text-gray-400">010-9876-5432</div>
+                        </td>
+                        <td class="p-4 font-bold text-gray-600 text-center">1회</td>
+                        <td class="p-4">
+                            <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold">일반회원</span>
+                        </td>
+                        <td class="p-4 flex space-x-2">
+                            <button class="p-2 text-gray-400 hover:text-orange-500 transition"><i class="fa-solid fa-user-gear"></i></button>
+                            <button class="p-2 text-gray-400 hover:text-red-500 transition"><i class="fa-solid fa-user-slash"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex justify-center mt-8 space-x-2">
+            <button class="w-10 h-10 flex items-center justify-center bg-white border rounded-xl hover:bg-gray-50 transition font-bold text-orange-500">1</button>
+            <button class="w-10 h-10 flex items-center justify-center bg-white border rounded-xl hover:bg-gray-50 transition">2</button>
+            <button class="w-10 h-10 flex items-center justify-center bg-white border rounded-xl hover:bg-gray-50 transition">3</button>
+        </div>
+    </main>
+
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>매일투어 - 마이페이지</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <header class="bg-white border-b py-4 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 flex justify-between items-center">
+            <h1 class="text-2xl font-black text-orange-500 italic cursor-pointer" onclick="location.href='index.html'">매일투어</h1>
+            <div class="flex items-center space-x-4">
+                <span class="text-sm font-bold text-gray-600">꽃게님 환영합니다</span>
+                <button class="text-xs text-gray-400 hover:text-red-500">로그아웃</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto py-10 px-4 grid grid-cols-1 lg:grid-cols-4 gap-8">
+        
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 text-center">
+                <div class="w-20 h-20 bg-orange-100 rounded-full mx-auto flex items-center justify-center mb-4">
+                    <i class="fa-solid fa-user text-3xl text-orange-500"></i>
+                </div>
+                <h2 class="text-lg font-bold text-gray-800">꽃게 회원님</h2>
+                <p class="text-sm text-gray-400 mb-4">일반회원</p>
+                <button class="w-full py-2 bg-gray-100 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-200 transition">프로필 수정</button>
+            </div>
+
+            <nav class="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 space-y-1">
+                <a href="#" class="flex items-center space-x-3 p-3 bg-orange-50 text-orange-600 rounded-2xl font-bold">
+                    <i class="fa-solid fa-clipboard-list w-5"></i><span>예약 내역</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 text-gray-500 hover:bg-gray-50 rounded-2xl transition">
+                    <i class="fa-solid fa-heart w-5"></i><span>관심 상품</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 text-gray-500 hover:bg-gray-50 rounded-2xl transition">
+                    <i class="fa-solid fa-headset w-5"></i><span>1:1 문의</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="lg:col-span-3 space-y-8">
+            <div class="grid grid-cols-3 gap-4">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-center">
+                    <p class="text-xs font-bold text-gray-400 uppercase">전체 예약</p>
+                    <p class="text-2xl font-black text-gray-800">12</p>
+                </div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-orange-100 text-center">
+                    <p class="text-xs font-bold text-orange-400 uppercase">결제 대기</p>
+                    <p class="text-2xl font-black text-orange-500">1</p>
+                </div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-center">
+                    <p class="text-xs font-bold text-gray-400 uppercase">완료된 산행</p>
+                    <p class="text-2xl font-black text-gray-800">8</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <h3 class="text-xl font-black text-gray-800 ml-2">최근 예약 내역</h3>
+                
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center space-x-4 w-full">
+                        <div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500 flex-shrink-0">
+                            <i class="fa-solid fa-mountain-sun text-2xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full uppercase">결제 완료</span>
+                            <h4 class="font-bold text-gray-800 text-lg">한라산 눈꽃 산행 + 백록담 투어</h4>
+                            <p class="text-sm text-gray-400">일시: 2026.02.28 (토) | 인원: 성인 1명</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2 w-full md:w-auto">
+                        <button class="flex-1 md:flex-none px-6 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-50">예약취소</button>
+                        <button class="flex-1 md:flex-none px-6 py-2 bg-gray-800 text-white rounded-xl text-sm font-bold hover:bg-black transition">상세보기</button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-50 opacity-70 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center space-x-4 w-full">
+                        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-400 flex-shrink-0">
+                            <i class="fa-solid fa-bus text-2xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full uppercase">여행 완료</span>
+                            <h4 class="font-bold text-gray-500 text-lg">태백산 상고대 트래킹</h4>
+                            <p class="text-sm text-gray-400">일시: 2026.01.15 (목) | 인원: 성인 2명</p>
+                        </div>
+                    </div>
+                    <button class="w-full md:w-auto px-6 py-2 bg-gray-100 text-gray-500 rounded-xl text-sm font-bold cursor-default">후기작성</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
