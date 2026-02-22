@@ -63,13 +63,54 @@
       </div>
 
       <div id="reserveForm" class="hidden">
+        <img id="selectedTripImg" class="w-full h-48 object-cover rounded-2xl mb-4 hidden shadow-md" src="" alt="상품 이미지" onerror="this.classList.add(\'hidden\'); this.removeAttribute(\'src\');">
         <div class="mb-6">
             <span class="bg-orange-500 text-white text-[10px] px-2 py-1 rounded-md font-bold mb-2 inline-block">RESERVE</span>
             <h3 class="text-2xl font-black text-gray-800 mb-1" id="selectedTripName">상품명</h3>
             <p class="text-orange-500 font-bold" id="selectedTripPrice">0원</p>
         </div>
 
-        <div class="space-y-5">
+        
+        <!-- 상품 상세 -->
+        <div id="tripDetailWrap" class="bg-[#f5f7fb] rounded-2xl p-4 border border-gray-100 mb-6 hidden">
+            <div class="flex items-center justify-between mb-2">
+                <h4 class="font-black text-[#1A2F53] text-sm">상품 상세</h4>
+                <span id="tripDateBadge" class="text-[11px] font-bold text-gray-500"></span>
+            </div>
+
+            <div class="flex flex-wrap gap-2 text-[11px] mb-3">
+                <span class="px-2 py-1 rounded-full bg-white border text-gray-600 font-bold">상태</span>
+                <span id="tripStatusBadge" class="font-black text-gray-800"></span>
+            </div>
+
+            <div id="tripDesc" class="text-sm text-gray-700 leading-relaxed whitespace-pre-line mb-4"></div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <div class="font-black text-gray-700 text-xs mb-1">일정/코스</div>
+                    <ul id="tripItin" class="list-disc pl-5 text-sm text-gray-700 space-y-1"></ul>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <div class="font-black text-gray-700 text-xs mb-1">포함사항</div>
+                        <ul id="tripInc" class="list-disc pl-5 text-sm text-gray-700 space-y-1"></ul>
+                    </div>
+                    <div>
+                        <div class="font-black text-gray-700 text-xs mb-1">불포함/추가비용</div>
+                        <ul id="tripExc" class="list-disc pl-5 text-sm text-gray-700 space-y-1"></ul>
+                    </div>
+                </div>
+                <div>
+                    <div class="font-black text-gray-700 text-xs mb-1">취소/환불 규정</div>
+                    <div id="tripCancel" class="text-sm text-gray-700 whitespace-pre-line"></div>
+                </div>
+                <div>
+                    <div class="font-black text-gray-700 text-xs mb-1">안내/비고</div>
+                    <div id="tripNotes" class="text-sm text-gray-700 whitespace-pre-line"></div>
+                </div>
+            </div>
+        </div>
+<div class="space-y-5">
           <div>
             <label class="text-[10px] font-black text-gray-400 uppercase tracking-tighter">예약자 성함</label>
             <input type="text" id="userName" class="w-full border-b-2 border-gray-100 py-2 focus:border-orange-500 outline-none transition font-bold" placeholder="입력하세요">
@@ -127,12 +168,13 @@
 </div>
 
 <script>
-  let currentTrip = { name: '', date: '', price: 0 };
+  let currentTrip = { name: '', date: '', price: 0, image_url: '', status: '', description:'', itinerary:'', meeting_points:'', includes:'', excludes:'', cancel_policy:'', notes:'' };
   let count = 1;
 
   // 관리자 데이터 로드
   function getSavedProducts() {
-    return JSON.parse(localStorage.getItem('maeil_db')) || [];
+    try { return JSON.parse(localStorage.getItem('maeil_db')) || []; }
+    catch(e) { return []; }
   }
 
   // 달력 그리기
@@ -160,7 +202,7 @@
           badge.textContent = `● ${p.name}`;
           badge.onclick = (e) => {
             e.stopPropagation();
-            selectTrip(p.name, p.price, dateStr);
+            selectTripProduct(p, dateStr);
           };
           wrap.appendChild(badge);
         });
@@ -168,18 +210,104 @@
       }
 
       cell.addEventListener('click', () => {
-        if (match.length) selectTrip(match[0].name, match[0].price, dateStr);
+        if (match.length) selectTripProduct(match[0], dateStr);
       });
       container.appendChild(cell);
     }
   }
 
-  function selectTrip(name, price, dateStr) {
-    currentTrip = { name, price: parseInt(price), date: dateStr };
+  function selectTripProduct(p, dateStr) {
+    const priceNum = parseInt(p?.price, 10) || 0;
+    currentTrip = {
+      name: String(p?.name || '').trim(),
+      price: priceNum,
+      date: String(p?.date || dateStr || '').trim(),
+      status: String(p?.status || '').trim(),
+      image_url: String(p?.image_url || '').trim(),
+      description: String(p?.description || '').trim(),
+      itinerary: String(p?.itinerary || '').trim(),
+      meeting_points: String(p?.meeting_points || '').trim(),
+      includes: String(p?.includes || '').trim(),
+      excludes: String(p?.excludes || '').trim(),
+      cancel_policy: String(p?.cancel_policy || '').trim(),
+      notes: String(p?.notes || '').trim()
+    };
+
     count = 1;
+    document.getElementById('pCount').innerText = count;
+
     document.getElementById('initialMsg').classList.add('hidden');
     document.getElementById('reserveForm').classList.remove('hidden');
-    document.getElementById('selectedTripName').innerText = name;
+
+    document.getElementById('selectedTripName').innerText = currentTrip.name || '상품명';
+
+    // 이미지 표시
+    const imgEl = document.getElementById('selectedTripImg');
+    if (imgEl) {
+      if (currentTrip.image_url) {
+        imgEl.src = currentTrip.image_url;
+        imgEl.classList.remove('hidden');
+      } else {
+        imgEl.classList.add('hidden');
+        imgEl.removeAttribute('src');
+      }
+    }
+
+    // 탑승지(집결지) 옵션: 관리자에서 meeting_points를 줄바꿈으로 저장했다면 자동 반영
+    const boarding = document.getElementById('boarding');
+    if (boarding) {
+      const pts = String(p?.meeting_points || '').split(/
+?
+/).map(v => v.trim()).filter(Boolean);
+      if (pts.length) {
+        boarding.innerHTML = '';
+        pts.forEach(v => {
+          const opt = document.createElement('option');
+          opt.textContent = v;
+          boarding.appendChild(opt);
+        });
+      }
+    }
+
+
+    // 상세 표시
+    const wrap = document.getElementById('tripDetailWrap');
+    const dateBadge = document.getElementById('tripDateBadge');
+    const stBadge = document.getElementById('tripStatusBadge');
+    const descEl = document.getElementById('tripDesc');
+
+    function fillList(id, text) {
+      const ul = document.getElementById(id);
+      if (!ul) return;
+      ul.innerHTML = '';
+      const items = String(text || '').split(/\r?\n/).map(v => v.trim()).filter(Boolean);
+      items.forEach(v => {
+        const li = document.createElement('li');
+        li.textContent = v;
+        ul.appendChild(li);
+      });
+    }
+
+    const hasAnyDetail = !!(currentTrip.description || currentTrip.itinerary || currentTrip.includes || currentTrip.excludes || currentTrip.cancel_policy || currentTrip.notes || currentTrip.status);
+
+    if (wrap) {
+      if (hasAnyDetail) wrap.classList.remove('hidden');
+      else wrap.classList.add('hidden');
+    }
+    if (dateBadge) dateBadge.innerText = currentTrip.date ? currentTrip.date.replaceAll('-', '.') : '';
+    if (stBadge) stBadge.innerText = currentTrip.status || '모객중';
+    if (descEl) descEl.innerText = currentTrip.description || '';
+
+    fillList('tripItin', currentTrip.itinerary);
+    fillList('tripInc', currentTrip.includes);
+    fillList('tripExc', currentTrip.excludes);
+
+    const cancelEl = document.getElementById('tripCancel');
+    if (cancelEl) cancelEl.innerText = currentTrip.cancel_policy || '';
+
+    const notesEl = document.getElementById('tripNotes');
+    if (notesEl) notesEl.innerText = currentTrip.notes || '';
+
     calculateTotal();
   }
 
@@ -190,7 +318,7 @@
   }
 
   function calculateTotal() {
-    const total = currentTrip.price * count;
+    const total = (parseInt(currentTrip.price, 10) || 0) * count;
     document.getElementById('selectedTripPrice').innerText = currentTrip.price.toLocaleString() + "원 (1인)";
     document.getElementById('finalPriceDisplay').innerText = total.toLocaleString() + "원";
   }
@@ -198,9 +326,17 @@
   function closeReserve() {
     document.getElementById('reserveForm').classList.add('hidden');
     document.getElementById('initialMsg').classList.remove('hidden');
+    const imgEl = document.getElementById('selectedTripImg');
+    if (imgEl) { imgEl.classList.add('hidden'); imgEl.removeAttribute('src'); }
+    const wrap = document.getElementById('tripDetailWrap');
+    if (wrap) wrap.classList.add('hidden');
+    currentTrip = { name:'', date:'', price:0, image_url:'', status:'', description:'', itinerary:'', meeting_points:'', includes:'', excludes:'', cancel_policy:'', notes:'' };
+    count = 1;
+    document.getElementById('pCount').innerText = count;
   }
 
   function handlePayment(method) {
+    if (!currentTrip.name) return alert('달력에서 상품을 먼저 선택해 주세요.');
     const userName = document.getElementById('userName').value.trim();
     if (!userName && method !== 'Bank') return alert('예약자 성함을 입력해 주세요.');
     
@@ -222,7 +358,7 @@
       onClick: () => handlePayment('GooglePay')
     });
     const container = document.getElementById('gpay-container');
-    if (container && !container.innerHTML) container.appendChild(btn);
+    if (container && !container.dataset.mounted) { container.appendChild(btn); container.dataset.mounted = '1'; }
   }
 
   window.addEventListener('load', () => {
