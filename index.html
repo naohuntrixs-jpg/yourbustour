@@ -6,367 +6,205 @@
   <title>유어버스투어 - 통합 예약 시스템</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <script async src="https://pay.google.com/gp/p/js/pay.js" onload="onGooglePayLoaded()"></script>
+  <style>
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+    .sticky-panel { position: sticky; top: 100px; height: calc(100vh - 120px); overflow-y: auto; }
+    .day-sun { color: #ef4444; } .day-sat { color: #3b82f6; }
+    .rolling-container { display: flex; overflow-x: auto; scroll-behavior: smooth; gap: 20px; padding: 10px 0; -ms-overflow-style: none; scrollbar-width: none; }
+    .rolling-container::-webkit-scrollbar { display: none; }
+    .product-card { min-width: 280px; max-width: 280px; transition: transform 0.3s; cursor: pointer; }
+    .product-card:hover { transform: translateY(-5px); }
+    /* 카테고리 애니메이션 */
+    .nav-link { position: relative; transition: color 0.3s; }
+    .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 0; background-color: #ff6b00; transition: width 0.3s; }
+    .nav-link:hover::after { width: 100%; }
+  </style>
 </head>
-
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-50 font-sans text-gray-900">
 
 <header class="bg-white border-b py-4 shadow-sm sticky top-0 z-50">
   <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
-    <h1 onclick="location.href='index.html'" class="text-3xl font-black text-orange-500 italic cursor-pointer">유어버스투어</h1>
-    
-    <nav class="hidden md:flex space-x-8 text-gray-700 font-bold">
-      <a href="index.html" class="hover:text-orange-500 transition border-b-2 border-orange-500 pb-1">홈</a>
-      <a href="community.html" class="hover:text-orange-500 transition flex items-center space-x-1">
-        <i class="fa-solid fa-users-viewfinder text-sm"></i>
-        <span>커뮤니티</span>
-      </a>
-      <a href="mypage.html" class="hover:text-orange-500 transition text-gray-400">마이페이지</a>
-    </nav>
+    <h1 onclick="location.href='index.html'" class="text-3xl font-black text-[#1A2F53] italic cursor-pointer">
+      유어버스<span class="text-[#ff6b00]">투어</span>
+    </h1>
 
+    <nav class="hidden md:flex space-x-10 text-sm font-black text-gray-600">
+      <a href="index.html" class="nav-link text-[#1A2F53]">홈</a>
+      <a href="tour_list.html" class="nav-link hover:text-[#1A2F53]">여행상품</a>
+      <a href="community.html" class="nav-link hover:text-[#1A2F53]">커뮤니티</a>
+      <a href="notice.html" class="nav-link hover:text-[#1A2F53]">공지사항</a>
+      <a href="cs.html" class="nav-link hover:text-[#1A2F53]">고객센터</a>
+    </nav>
+    
     <div class="flex items-center space-x-4">
-      <button onclick="location.href='login.html'" class="text-sm font-bold text-gray-500 hover:text-orange-500 transition">로그인</button>
-      <button onclick="location.href='admin/admin_products.html'" class="bg-gray-100 text-gray-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-200 transition">관리자</button>
+      <button onclick="location.href='login.html'" class="text-xs font-bold text-gray-400 hover:text-[#1A2F53]">로그인</button>
+      <button class="md:hidden text-[#1A2F53] text-xl"><i class="fa-solid fa-bars"></i></button>
     </div>
   </div>
 </header>
 
-<div class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-  <div class="lg:col-span-8">
-    <div class="flex justify-between items-center mb-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-      <h2 class="text-xl font-bold text-gray-800">
-        <i class="fa-solid fa-calendar-days mr-2 text-orange-500"></i> 2026년 2월 일정표
-      </h2>
-      <div class="flex space-x-2">
-        <button class="p-2 hover:bg-gray-100 rounded border text-gray-400">이전</button>
-        <button class="p-2 hover:bg-gray-100 rounded border text-gray-400">다음</button>
+<main class="max-w-7xl mx-auto px-4 py-10">
+  <div class="flex flex-col lg:flex-row gap-10">
+    <div class="flex-1 overflow-hidden">
+      <div class="bg-white rounded-[32px] shadow-xl p-8 border border-gray-100 mb-10">
+        <div class="flex justify-between items-center mb-8">
+          <button id="btnPrevMonth" class="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-full transition"><i class="fa-solid fa-chevron-left"></i></button>
+          <h2 id="calendarTitle" class="text-2xl font-black text-[#1A2F53]"></h2>
+          <button id="btnNextMonth" class="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-full transition"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <div class="calendar-grid text-center text-xs font-bold text-gray-300 mb-4 uppercase tracking-widest">
+          <div class="day-sun text-red-400">Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div class="day-sat text-blue-400">Sat</div>
+        </div>
+        <div id="calendarBody" class="calendar-grid gap-2"></div>
       </div>
+
+      <h3 class="text-xl font-black text-[#1A2F53] mb-6 flex items-center">
+        <span class="w-8 h-8 bg-orange-100 text-[#ff6b00] rounded-lg flex items-center justify-center mr-3 text-sm">
+          <i class="fa-solid fa-fire"></i>
+        </span>
+        지금 가장 인기있는 여행
+      </h3>
+      <div id="rollingList" class="rolling-container"></div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="grid grid-cols-7 bg-gray-50 border-b text-center py-4 font-black text-gray-400 uppercase text-xs tracking-widest">
-        <div class="text-red-400">Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div class="text-blue-400">Sat</div>
-      </div>
-      <div id="calendar-container" class="grid grid-cols-7 min-h-[720px] border-l border-t"></div>
-    </div>
-  </div>
-
-  <div class="lg:col-span-4">
-    <div id="reserveSidePane" class="bg-white rounded-3xl shadow-xl border border-orange-50 border-b-4 border-b-orange-500 p-8 sticky top-28 transition-all duration-300">
-      
-      <div id="initialMsg" class="text-center py-20">
-        <div class="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i class="fa-solid fa-mountain-sun text-2xl text-orange-200"></i>
+    <aside class="w-full lg:w-[400px]">
+      <div id="reserveForm" class="hidden sticky-panel bg-white rounded-[32px] shadow-2xl p-8 border border-gray-100">
+        <div class="relative mb-6">
+          <img id="selectedTripImg" class="w-full h-48 object-cover rounded-[24px] shadow-md" src="">
+          <span class="absolute top-4 left-4 bg-[#ff6b00] text-white text-[10px] font-bold px-3 py-1 rounded-full">BEST</span>
         </div>
-        <p class="text-gray-400 font-medium">달력에서 원하시는 <br>산행 일정을 선택해 주세요.</p>
-      </div>
-
-      <div id="reserveForm" class="hidden">
-        <img id="selectedTripImg" class="w-full h-48 object-cover rounded-2xl mb-4 hidden shadow-md" src="" alt="상품 이미지" onerror="this.classList.add(\'hidden\'); this.removeAttribute(\'src\');">
-        <div class="mb-6">
-            <span class="bg-orange-500 text-white text-[10px] px-2 py-1 rounded-md font-bold mb-2 inline-block">RESERVE</span>
-            <h3 class="text-2xl font-black text-gray-800 mb-1" id="selectedTripName">상품명</h3>
-            <p class="text-orange-500 font-bold" id="selectedTripPrice">0원</p>
-        </div>
-
+        <h3 id="selectedTripName" class="text-2xl font-black text-[#1A2F53] mb-2 leading-tight"></h3>
+        <p id="selectedTripPrice" class="text-2xl font-black text-[#ff6b00] mb-6"></p>
         
-        <!-- 상품 상세 -->
-        <div id="tripDetailWrap" class="bg-[#f5f7fb] rounded-2xl p-4 border border-gray-100 mb-6 hidden">
-            <div class="flex items-center justify-between mb-2">
-                <h4 class="font-black text-[#1A2F53] text-sm">상품 상세</h4>
-                <span id="tripDateBadge" class="text-[11px] font-bold text-gray-500"></span>
-            </div>
-
-            <div class="flex flex-wrap gap-2 text-[11px] mb-3">
-                <span class="px-2 py-1 rounded-full bg-white border text-gray-600 font-bold">상태</span>
-                <span id="tripStatusBadge" class="font-black text-gray-800"></span>
-            </div>
-
-            <div id="tripDesc" class="text-sm text-gray-700 leading-relaxed whitespace-pre-line mb-4"></div>
-
-            <div class="grid grid-cols-1 gap-4">
-                <div>
-                    <div class="font-black text-gray-700 text-xs mb-1">일정/코스</div>
-                    <ul id="tripItin" class="list-disc pl-5 text-sm text-gray-700 space-y-1"></ul>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <div class="font-black text-gray-700 text-xs mb-1">포함사항</div>
-                        <ul id="tripInc" class="list-disc pl-5 text-sm text-gray-700 space-y-1"></ul>
-                    </div>
-                    <div>
-                        <div class="font-black text-gray-700 text-xs mb-1">불포함/추가비용</div>
-                        <ul id="tripExc" class="list-disc pl-5 text-sm text-gray-700 space-y-1"></ul>
-                    </div>
-                </div>
-                <div>
-                    <div class="font-black text-gray-700 text-xs mb-1">취소/환불 규정</div>
-                    <div id="tripCancel" class="text-sm text-gray-700 whitespace-pre-line"></div>
-                </div>
-                <div>
-                    <div class="font-black text-gray-700 text-xs mb-1">안내/비고</div>
-                    <div id="tripNotes" class="text-sm text-gray-700 whitespace-pre-line"></div>
-                </div>
-            </div>
-        </div>
-<div class="space-y-5">
-          <div>
-            <label class="text-[10px] font-black text-gray-400 uppercase tracking-tighter">예약자 성함</label>
-            <input type="text" id="userName" class="w-full border-b-2 border-gray-100 py-2 focus:border-orange-500 outline-none transition font-bold" placeholder="입력하세요">
-          </div>
-
-          <div>
-            <label class="text-[10px] font-black text-gray-400 uppercase tracking-tighter">탑승지 선택</label>
-            <select id="boarding" class="w-full border-b-2 border-gray-100 py-2 focus:border-orange-500 outline-none bg-white font-medium">
-              <option>사당역 1번출구 (07:00)</option>
-              <option>양재역 12번출구 (07:20)</option>
-              <option>죽전 정류장 (07:40)</option>
-            </select>
-          </div>
-
-          <div class="flex justify-between items-center py-4 bg-gray-50 px-4 rounded-2xl">
-            <span class="font-bold text-gray-500 text-sm">인원 설정</span>
-            <div class="flex items-center space-x-4">
-              <button type="button" onclick="updateCount(-1)" class="w-8 h-8 rounded-full bg-white border shadow-sm font-bold">-</button>
-              <span id="pCount" class="font-black text-lg">1</span>
-              <button type="button" onclick="updateCount(1)" class="w-8 h-8 rounded-full bg-white border shadow-sm font-bold">+</button>
-            </div>
-          </div>
-
-          <div class="border-t pt-6 mt-6">
-            <div class="flex justify-between items-end mb-6">
-              <span class="text-gray-400 font-bold text-sm">합계 금액</span>
-              <span id="finalPriceDisplay" class="text-3xl font-black text-orange-600">0원</span>
-            </div>
-
-            <div class="space-y-3">
-              <button type="button" onclick="handlePayment('NaverPay')" class="w-full bg-[#03C75A] text-white py-4 rounded-2xl font-bold shadow-lg hover:opacity-90 transition flex items-center justify-center space-x-2">
-                <span class="text-xl font-black italic">N</span><span>Pay 구매하기</span>
-              </button>
-
-              <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="handlePayment('Card')" class="bg-gray-800 text-white py-4 rounded-2xl font-bold text-sm hover:bg-black transition flex items-center justify-center space-x-2">
-                  <i class="fa-solid fa-credit-card"></i><span>카드결제</span>
-                </button>
-                <button type="button" onclick="handlePayment('Bank')" class="bg-white border border-gray-200 text-gray-600 py-4 rounded-2xl font-bold text-sm hover:bg-gray-50 transition flex items-center justify-center space-x-2">
-                  <i class="fa-solid fa-building-columns"></i><span>무통장</span>
-                </button>
-              </div>
-
-              <div id="gpay-container" class="w-full flex justify-center pt-2"></div>
-
-              <button type="button" onclick="closeReserve()" class="w-full py-3 text-gray-400 text-xs font-bold hover:text-gray-600 transition">
-                선택 취소하기
-              </button>
-            </div>
+        <div class="space-y-4 mb-8">
+          <div class="bg-gray-50 p-4 rounded-2xl">
+            <p class="text-[11px] font-bold text-gray-400 mb-1">일정 안내</p>
+            <p id="pItinerary" class="text-sm text-gray-600 leading-relaxed"></p>
           </div>
         </div>
+
+        <div class="bg-[#1A2F53] p-5 rounded-2xl mb-6">
+          <div class="flex justify-between items-center text-white font-bold mb-2">
+            <span class="text-sm opacity-70">총 결제 금액</span>
+            <span id="totalAmountDisplay" class="text-xl text-[#ff6b00]">0원</span>
+          </div>
+        </div>
+
+        <button onclick="handlePayment()" class="w-full bg-[#ff6b00] text-white py-5 rounded-[20px] font-black text-lg shadow-lg shadow-orange-200 hover:bg-[#e65f00] transition-all mb-3">
+          무통장 입금으로 예약하기
+        </button>
+        <button onclick="closeReserve()" class="w-full text-gray-400 text-xs font-bold underline">다른 날짜 보기</button>
       </div>
-    </div>
+
+      <div id="emptyMsg" class="h-[400px] flex flex-col items-center justify-center text-gray-300 border-2 border-dashed border-gray-200 rounded-[32px] text-center p-10">
+        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+          <i class="fa-solid fa-calendar-day text-2xl"></i>
+        </div>
+        <p class="font-bold text-gray-400 leading-relaxed">달력에서 원하시는<br>여행 날짜를 선택해주세요.</p>
+      </div>
+    </aside>
   </div>
-</div>
+</main>
+
+<a href="https://open.kakao.com/o/YOUR_CODE" target="_blank" class="fixed bottom-8 right-8 z-[9999] group">
+  <div class="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-white px-4 py-2 rounded-xl shadow-xl border text-xs font-black text-[#1A2F53] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+    무엇이든 물어보세요! 👋
+  </div>
+  <div class="w-16 h-16 bg-[#FEE500] rounded-2xl flex items-center justify-center shadow-2xl hover:scale-110 hover:rotate-6 transition-all">
+    <i class="fa-solid fa-comment text-[#3C1E1E] text-3xl"></i>
+  </div>
+</a>
 
 <script>
-  let currentTrip = { name: '', date: '', price: 0, image_url: '', status: '', description:'', itinerary:'', meeting_points:'', includes:'', excludes:'', cancel_policy:'', notes:'' };
-  let count = 1;
+  let viewYear = new Date().getFullYear();
+  let viewMonth = new Date().getMonth();
+  let db = [];
 
-  // 관리자 데이터 로드
-  function getSavedProducts() {
-    try { return JSON.parse(localStorage.getItem('maeil_db')) || []; }
-    catch(e) { return []; }
+  function init() {
+    try {
+      const rawData = localStorage.getItem('maeil_db');
+      db = rawData ? JSON.parse(rawData) : [];
+      renderAll();
+    } catch (e) {
+      db = [];
+    }
   }
 
-  // 달력 그리기
+  function renderAll() {
+    renderCalendar();
+    renderRollingList();
+  }
+
   function renderCalendar() {
-    const container = document.getElementById('calendar-container');
-    container.innerHTML = '';
-    const daysInMonth = 28; // 2026년 2월 기준
-    const products = getSavedProducts();
+    const title = document.getElementById('calendarTitle');
+    const body = document.getElementById('calendarBody');
+    title.innerText = `${viewYear}.${String(viewMonth + 1).padStart(2, '0')}`;
+    body.innerHTML = '';
 
-    for (let i = 1; i <= daysInMonth; i++) {
-      const dateStr = `2026-02-${String(i).padStart(2, '0')}`;
-      const cell = document.createElement('div');
-      cell.className = "calendar-day border-r border-b p-3 min-h-[120px] hover:bg-orange-50/30 transition cursor-pointer group relative";
+    const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+    const lastDate = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+    for (let i = 0; i < firstDay; i++) body.innerHTML += '<div></div>';
+
+    for (let d = 1; d <= lastDate; d++) {
+      const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const dayObj = new Date(viewYear, viewMonth, d);
+      const isToday = new Date().toDateString() === dayObj.toDateString() ? 'ring-2 ring-[#ff6b00] ring-inset' : '';
       
-      const isToday = i === new Date().getDate();
-      cell.innerHTML = `<span class="font-bold ${i===1?'text-red-400':(i%7===0?'text-blue-400':'text-gray-300')}">${i}</span>`;
-
-      const match = products.filter(p => p.date === dateStr);
-      if (match.length) {
-        const wrap = document.createElement('div');
-        wrap.className = "mt-2 space-y-1";
-        match.forEach(p => {
-          const badge = document.createElement('div');
-          badge.className = "text-[10px] bg-orange-100 text-orange-600 p-2 rounded-lg font-black border border-orange-200 shadow-sm";
-          badge.textContent = `● ${p.name}`;
-          badge.onclick = (e) => {
-            e.stopPropagation();
-            selectTripProduct(p, dateStr);
-          };
-          wrap.appendChild(badge);
-        });
-        cell.appendChild(wrap);
-      }
-
-      cell.addEventListener('click', () => {
-        if (match.length) selectTripProduct(match[0], dateStr);
+      let html = `<div class="bg-white p-2 h-32 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition ${isToday}">
+                    <div class="text-xs font-black text-gray-400 mb-2">${d}</div>`;
+      
+      db.filter(x => x.date === dateStr).forEach(p => {
+        html += `<div onclick='selectTrip(${JSON.stringify(p).replace(/'/g, "&apos;")})' 
+                     class="bg-[#1A2F53] text-white text-[10px] p-2 rounded-xl mb-1 cursor-pointer truncate font-bold hover:bg-[#ff6b00] transition-colors">
+                   ${p.name}
+                 </div>`;
       });
-      container.appendChild(cell);
+      body.innerHTML += html + '</div>';
     }
   }
 
-  function selectTripProduct(p, dateStr) {
-    const priceNum = parseInt(p?.price, 10) || 0;
-    currentTrip = {
-      name: String(p?.name || '').trim(),
-      price: priceNum,
-      date: String(p?.date || dateStr || '').trim(),
-      status: String(p?.status || '').trim(),
-      image_url: String(p?.image_url || '').trim(),
-      description: String(p?.description || '').trim(),
-      itinerary: String(p?.itinerary || '').trim(),
-      meeting_points: String(p?.meeting_points || '').trim(),
-      includes: String(p?.includes || '').trim(),
-      excludes: String(p?.excludes || '').trim(),
-      cancel_policy: String(p?.cancel_policy || '').trim(),
-      notes: String(p?.notes || '').trim()
-    };
+  function renderRollingList() {
+    const list = document.getElementById('rollingList');
+    if(db.length === 0) {
+        list.innerHTML = "<p class='text-gray-300 py-10'>등록된 여행 상품이 없습니다.</p>";
+        return;
+    }
+    list.innerHTML = db.slice(0, 10).map(p => `
+      <div class="product-card bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden" onclick='selectTrip(${JSON.stringify(p).replace(/'/g, "&apos;")})'>
+        <img src="${p.image_url || 'https://via.placeholder.com/300x200'}" class="w-full h-36 object-cover">
+        <div class="p-5">
+          <h4 class="font-black text-[#1A2F53] truncate mb-1">${p.name}</h4>
+          <p class="text-sm font-bold text-[#ff6b00]">${Number(p.price).toLocaleString()}원~</p>
+        </div>
+      </div>
+    `).join('');
+  }
 
-    count = 1;
-    document.getElementById('pCount').innerText = count;
-
-    document.getElementById('initialMsg').classList.add('hidden');
+  function selectTrip(p) {
+    document.getElementById('emptyMsg').classList.add('hidden');
     document.getElementById('reserveForm').classList.remove('hidden');
-
-    document.getElementById('selectedTripName').innerText = currentTrip.name || '상품명';
-
-    // 이미지 표시
-    const imgEl = document.getElementById('selectedTripImg');
-    if (imgEl) {
-      if (currentTrip.image_url) {
-        imgEl.src = currentTrip.image_url;
-        imgEl.classList.remove('hidden');
-      } else {
-        imgEl.classList.add('hidden');
-        imgEl.removeAttribute('src');
-      }
-    }
-
-    // 탑승지(집결지) 옵션: 관리자에서 meeting_points를 줄바꿈으로 저장했다면 자동 반영
-    const boarding = document.getElementById('boarding');
-    if (boarding) {
-      const pts = String(p?.meeting_points || '').split(/
-?
-/).map(v => v.trim()).filter(Boolean);
-      if (pts.length) {
-        boarding.innerHTML = '';
-        pts.forEach(v => {
-          const opt = document.createElement('option');
-          opt.textContent = v;
-          boarding.appendChild(opt);
-        });
-      }
-    }
-
-
-    // 상세 표시
-    const wrap = document.getElementById('tripDetailWrap');
-    const dateBadge = document.getElementById('tripDateBadge');
-    const stBadge = document.getElementById('tripStatusBadge');
-    const descEl = document.getElementById('tripDesc');
-
-    function fillList(id, text) {
-      const ul = document.getElementById(id);
-      if (!ul) return;
-      ul.innerHTML = '';
-      const items = String(text || '').split(/\r?\n/).map(v => v.trim()).filter(Boolean);
-      items.forEach(v => {
-        const li = document.createElement('li');
-        li.textContent = v;
-        ul.appendChild(li);
-      });
-    }
-
-    const hasAnyDetail = !!(currentTrip.description || currentTrip.itinerary || currentTrip.includes || currentTrip.excludes || currentTrip.cancel_policy || currentTrip.notes || currentTrip.status);
-
-    if (wrap) {
-      if (hasAnyDetail) wrap.classList.remove('hidden');
-      else wrap.classList.add('hidden');
-    }
-    if (dateBadge) dateBadge.innerText = currentTrip.date ? currentTrip.date.replaceAll('-', '.') : '';
-    if (stBadge) stBadge.innerText = currentTrip.status || '모객중';
-    if (descEl) descEl.innerText = currentTrip.description || '';
-
-    fillList('tripItin', currentTrip.itinerary);
-    fillList('tripInc', currentTrip.includes);
-    fillList('tripExc', currentTrip.excludes);
-
-    const cancelEl = document.getElementById('tripCancel');
-    if (cancelEl) cancelEl.innerText = currentTrip.cancel_policy || '';
-
-    const notesEl = document.getElementById('tripNotes');
-    if (notesEl) notesEl.innerText = currentTrip.notes || '';
-
-    calculateTotal();
-  }
-
-  function updateCount(delta) {
-    count = Math.max(1, count + delta);
-    document.getElementById('pCount').innerText = count;
-    calculateTotal();
-  }
-
-  function calculateTotal() {
-    const total = (parseInt(currentTrip.price, 10) || 0) * count;
-    document.getElementById('selectedTripPrice').innerText = currentTrip.price.toLocaleString() + "원 (1인)";
-    document.getElementById('finalPriceDisplay').innerText = total.toLocaleString() + "원";
+    document.getElementById('selectedTripName').innerText = p.name;
+    document.getElementById('selectedTripPrice').innerText = Number(p.price).toLocaleString() + '원';
+    document.getElementById('totalAmountDisplay').innerText = Number(p.price).toLocaleString() + '원';
+    document.getElementById('pItinerary').innerText = p.itinerary || '자세한 일정은 예약 후 안내드립니다.';
+    document.getElementById('selectedTripImg').src = p.image_url || 'https://via.placeholder.com/400x300';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function closeReserve() {
     document.getElementById('reserveForm').classList.add('hidden');
-    document.getElementById('initialMsg').classList.remove('hidden');
-    const imgEl = document.getElementById('selectedTripImg');
-    if (imgEl) { imgEl.classList.add('hidden'); imgEl.removeAttribute('src'); }
-    const wrap = document.getElementById('tripDetailWrap');
-    if (wrap) wrap.classList.add('hidden');
-    currentTrip = { name:'', date:'', price:0, image_url:'', status:'', description:'', itinerary:'', meeting_points:'', includes:'', excludes:'', cancel_policy:'', notes:'' };
-    count = 1;
-    document.getElementById('pCount').innerText = count;
+    document.getElementById('emptyMsg').classList.remove('hidden');
   }
 
-  function handlePayment(method) {
-    if (!currentTrip.name) return alert('달력에서 상품을 먼저 선택해 주세요.');
-    const userName = document.getElementById('userName').value.trim();
-    if (!userName && method !== 'Bank') return alert('예약자 성함을 입력해 주세요.');
-    
-    const total = (currentTrip.price * count).toLocaleString();
-    if (method === 'Bank') {
-      alert(`[무통장 입금 안내]\n성함: ${userName}님\n상품: ${currentTrip.name}\n금액: ${total}원\n계좌: 기업 526-024827-01-010 (유어버스투어)`);
-    } else {
-      alert(`[${method} 결제]\n${total}원 결제창으로 연결합니다.`);
-    }
-    alert("예약 신청이 완료되었습니다!");
+  function handlePayment() {
+    alert('예약 신청이 접수되었습니다!\n입금 확인 후 확정 문자를 발송해 드립니다.');
   }
 
-  // Google Pay
-  function onGooglePayLoaded() {
-    if (!window.google) return;
-    const paymentsClient = new google.payments.api.PaymentsClient({ environment: 'TEST' });
-    const btn = paymentsClient.createButton({
-      buttonColor: 'black', buttonType: 'book',
-      onClick: () => handlePayment('GooglePay')
-    });
-    const container = document.getElementById('gpay-container');
-    if (container && !container.dataset.mounted) { container.appendChild(btn); container.dataset.mounted = '1'; }
-  }
+  document.getElementById('btnPrevMonth').onclick = () => { viewMonth--; if(viewMonth<0){viewMonth=11; viewYear--;} renderCalendar(); };
+  document.getElementById('btnNextMonth').onclick = () => { viewMonth++; if(viewMonth>11){viewMonth=0; viewYear++;} renderCalendar(); };
 
-  window.addEventListener('load', () => {
-    renderCalendar();
-    setTimeout(onGooglePayLoaded, 1000);
-  });
+  window.onload = init;
 </script>
 </body>
-
 </html>
-
